@@ -1,0 +1,51 @@
+
+
+    APP-Busqueda-ElementS-Farmaceuticos
+	
+	
+		B.E.F
+   
+   
+  -> Objetivo General : Diseñar un software para la optimizacion y busqueda de elementos y/o medicamentos farmaceuticos 
+  
+  -> Objetivos Especificos
+  
+  *  Agilizar y optimizar las búsquedas de medicamentos utilizando web crawling
+  
+  *  Brindar una experiencia de usuario agradable e intuitiva.
+  
+  *	 Presentar al usuario una variedad de detalles sobre su búsqueda en base a distintos parámetros como costo y disponibilidad
+  
+  *  Implementar Codigo.
+  
+  -> Descripcion Problema: 
+  
+	Los pacientes despues de un diagnostico medico, no cuentan con la suficiente informacion de donde encontrar u obtener algunos medicamentos que el plan de salud no cubre,
+	lo cual conlleva a la perdida de tiempo, dinero y desplazamiento a diferentes farmacias o droguerias en busca de estos. 
+  
+  -> Soluicon Problema:
+  
+	Implementar un software inteligente el cual sea capaz de realizar una busqueda a nivel regional de medicamentos.
+	Dicho software adicionalmente contara con una localizacion de los lugares donde se vende recurrentemente los medicamentos solicitados por el usuario
+	Visualizacion de resultados obtenidos de la busqueda donde se mostrara los enlaces donde se encuentran los medicamentos
+
+  
+  
+  -> Requerimientos
+  
+   * Web Scraper
+   * Python -  Javascript (opcionales)
+   * Web Crawling
+   * Xampp - Wampp
+   * Heroku
+   * GitHub
+   * Jira - Metodologia Scrum
+   
+  
+  -> Alcance
+  
+	* Informacion Inventario Farmacias
+	* Se cumpliran los objetivos especificos
+	* Combinacion de Web Crawling y Web Scraper
+	
+  
