@@ -3,6 +3,6 @@ sistemas inteligentes
 
 Integrantes:
 Denilson Hernandez,
-Julian Esreban Perez,
+Julian Esteban Perez,
 Juan Mario Valderrama,
 Luis Fernando Londoño
