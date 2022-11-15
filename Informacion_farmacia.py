@@ -1,54 +1,94 @@
-from dataclasses import field
-from gc import callbacks
-from pydoc import describe
-from tracemalloc import start
-from scrapy.item import Field
-from scrapy.item import Item
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.selector import Selector
-from scrapy.loader.processors import MapCompose
-from scrapy.linkextractors import LinkExtractor
-from scrapy.loader import ItemLoader
+from flask import(
+    Flask,
+    render_template,
+    request,
+    redirect,
+    flash,
+    url_for,
+    current_app
+)
+import urllib.request
+from urllib.parse import urlparse,urljoin
+from bs4 import BeautifulSoup
+import requests,validators,uuid,pathlib,os
 
-class Articulo(Item): #items que encesito buscar
-    titulo =Field()
-    precio = Field()
-    descripcion =Field()
+app = Flask(__name__)
+app.secret_key ="secret-key"
+
+def image_handler(tag,specific_element,requested_url):
+    image_paths = []
     
-class MercadoLibreCrawler(CrawlSpider):
-    name = 'mercadoLibre'
-    custom_settings={
-        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
-        'CLOSESPIDER_PAGECOUNT': 20 #paginacion
-    }
-    
-    download_dely=1 # tiempo entre pagina
-    
-    allowed_domines =['listado.mercadolibre.com.co','articulo.mercadolibre.com.co'] #restringir busqueda
-    
-    start_urls = ['https://listado.mercadolibre.com.co/medicamentos/'] #pagina a buscar
-    
-    #definir las reglas en una tupla
-    rules = (
-        #paginacion
-        Rule(
-            LinkExtractor(
-                allow=r'/medicamentos_Desde_'
-            ), follow=True
-        ),
-        #detalles producto
-        Rule(
-            LinkExtractor(
-                allow=r'/MCO-'
-            ), follow =True, callback='parse_items'
-        ),
-    )
-    
-    def parse_item(self,response):
+    if tag =='img':
+        images =[img['src']for img in specific_element]
+        for i in specific_element:
+            image_path = i.attrs['src']
+            valid_imgpath =validators.url(image_path)
+            if valid_imgpath == True:
+                full_path = image_path
+            else:
+                full_path = urljoin(requested_url,image_path)
+                image_paths.append(full_path)
+                
+    return image_paths
+
+@app.route("/",methods=("GET", "POST"),strict_slashes=False)
+def index():
+    if request.method == "POST":
         
-        item = ItemLoader(Articulo(),response)
-        item.add_xpath('titulo', '//div[@class="ui-pdp-header__title-container"]/h1/text()')
-        item.add_xpath('descripcion', '//div[@class=ui-pdp-description"]/p/text()')
-        item.add_xpath('precio', '//span[@class="andes-money-amount__fraction"]')
+        try:
+            global requested_url,specific_element,tag
+            
+            requested_url= request.form.get('urltext')
+            tag = request.form.get('specificElement')
+            
+            source = requests.get(requested_url).text
+            
+            soup = BeautifulSoup(source, "html.parser")
+            
+            specific_element = soup.find_all(tag)
+            
+            counter=len(specific_element)
+            
+            image_paths = image_handler(
+                tag,
+                specific_element,
+                requested_url
+            )
+            
+            return render_template("index.html",
+                url= requested_url,
+                counter=counter,
+                image_paths=image_paths,
+                results = specific_element)
+            
+        except Exception as e:
+            flash(e,"danger")
+            
+    return render_template("index.html")
+
+
+@app.route("/download", methods=("GET","POST"), strict_slashes=False)
+
+def downloader():
+    try:
+        for img in image_handler(tag,specific_element,requested_url):
+            image_url = img
+            
+            filename = str(uuid.uuid4())
+            file_ext =pathlib.Path(image_url).suffix
+            picture_filename = filename + file_ext
+            
+            downloads_path=str(pathlib.Path.home() / "Downloads")
+            picture_path = os.path.join(downloads_path, picture_filename)
+            urllib.request.urlretrieve(image_url,picture_path)
+            
+        flash("Descarga exitosa","success")
         
-        yield item.load_item()
+    except Exception as e:
+        flash(e, "danger") 
+        
+    return redirect(url_for('index'))
+        
+if __name__ == "__main__":
+    app.run(debug=False,host='0.0.0.0')
+            
